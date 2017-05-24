@@ -5,13 +5,14 @@
     android:layout_height="match_parent"
     android:background="#000"
     >
-    <VideoView
+    <com.lhd.mobileplayer4.view.MyVideoView
         android:id="@+id/videoview_system"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
         />
 
-    <include layout="@layout/media_controller" />
+    <include layout="@layout/media_controller" android:id="@+id/media_controller"/>
 
+    <include layout="@layout/ll_loading" android:id="@+id/ll_loading"/>
 </RelativeLayout>

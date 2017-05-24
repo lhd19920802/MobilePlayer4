@@ -85,8 +85,14 @@ public class VideoFragment extends BaseFragment
 //            Intent intent=new Intent();
 //            intent.setDataAndType(Uri.parse(mediaItem.getData()), "video/*");
 //            mContext.startActivity(intent);
+            //2.单个视频
+//            Intent intent=new Intent(mContext,SystemVideoPlayer.class);
+//            intent.setData(Uri.parse(mediaItem.getData()));
+//            mContext.startActivity(intent);
+
+
             //3.传递列表数据-对象-序列化
-            Intent intent = new Intent(mContext,SystemVideoPlayer.class);
+            Intent intent=new Intent(mContext,SystemVideoPlayer.class);
             Bundle bundle = new Bundle();
             bundle.putSerializable("videolist", (Serializable) mediaItems);
             intent.putExtras(bundle);
