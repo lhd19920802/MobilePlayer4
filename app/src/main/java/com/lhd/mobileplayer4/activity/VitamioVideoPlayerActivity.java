@@ -1,9 +1,7 @@
 package com.lhd.mobileplayer4.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -33,23 +31,25 @@ import com.lhd.mobileplayer4.R;
 import com.lhd.mobileplayer4.domain.MediaItem;
 import com.lhd.mobileplayer4.receiver.MyBateryReceiver;
 import com.lhd.mobileplayer4.utils.Utils;
-import com.lhd.mobileplayer4.view.MyVideoView;
+import com.lhd.mobileplayer4.view.MyVitamioVideoView;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class SystemVideoPlayer extends Activity implements View.OnClickListener
+import io.vov.vitamio.Vitamio;
+
+public class VitamioVideoPlayerActivity extends Activity implements View.OnClickListener
 {
-    private static final String TAG = SystemVideoPlayer.class.getSimpleName();
+    private static final String TAG = VitamioVideoPlayerActivity.class.getSimpleName();
     private static final int PROGRESS = 1;
     private static final int SYSTEM_TIME = 2;
     private static final int HIDE_MEDIA_CONTROLLER = 3;
     private static final int SHOW_SPEED = 4;
     private static final int DEFAULT_SCREEN = 1;
     private static final int FULL_SCREEN = 2;
-    private MyVideoView videoview_system;
+    private MyVitamioVideoView videoview_system;
     //视频集合
     private List<MediaItem> mediaItems;
     private int position;
@@ -121,7 +121,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
      */
     private void findViews()
     {
-        videoview_system = (MyVideoView) findViewById(R.id.videoview_system);
+        videoview_system = (MyVitamioVideoView) findViewById(R.id.videoview_system);
         llTop = (LinearLayout) findViewById(R.id.ll_top);
         tvName = (TextView) findViewById(R.id.tv_name);
         ivBattery = (ImageView) findViewById(R.id.iv_battery);
@@ -266,7 +266,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
         else if (v == btnSwichPlayer)
         {
             // Handle clicks for btnSwichPlayer
-            showSwichPlayerDialog();
+            startVitamioPlayer();
 
         }
         else if (v == btnExit)
@@ -299,22 +299,6 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
         handler.sendEmptyMessageDelayed(HIDE_MEDIA_CONTROLLER, 2000);
     }
 
-    private void showSwichPlayerDialog()
-    {
-        new AlertDialog.Builder(this)
-                    .setTitle("系统播放器提醒您")
-                    .setMessage("当您播放视频，有声音没有画面的时候，请切换万能播放器播放")
-                .setPositiveButton("确定", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        startVitamioPlayer();
-                    }
-                })
-                    .setNegativeButton("取消", null)
-                    .show();
-    }
 
 
     /**
@@ -386,7 +370,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
             {
                 case PROGRESS:
                     //得到当前视频播放位置
-                    int currentPosition = videoview_system.getCurrentPosition();
+                    int currentPosition = (int) videoview_system.getCurrentPosition();
                     tvCurrentTime.setText(utils.stringForTime(currentPosition));
                     seekbarVideo.setProgress(currentPosition);
 
@@ -402,32 +386,34 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
                         seekbarVideo.setSecondaryProgress(0);
                     }
 
-                    //监听卡
-                    if (!isUseSystem)
-                    {
 
-                        if (videoview_system.isPlaying())
+
+                        //监听卡
+                        if (!isUseSystem)
                         {
-                            int buffer = currentPosition - prePosition;
-                            if (buffer < 500)
+
+                            if (videoview_system.isPlaying())
                             {
-                                //视频卡了
-                                ll_loading.setVisibility(View.VISIBLE);
+                                int buffer = currentPosition - prePosition;
+                                if (buffer < 500)
+                                {
+                                    //视频卡了
+                                    ll_loading.setVisibility(View.VISIBLE);
+                                }
+                                else
+                                {
+                                    //视频不卡了
+                                    ll_loading.setVisibility(View.GONE);
+                                }
                             }
+                            /**
+                             * 防止暂停出现progressBar
+                             */
                             else
                             {
-                                //视频不卡了
                                 ll_loading.setVisibility(View.GONE);
                             }
-                        }
-                        /**
-                         * 防止暂停出现progressBar
-                         */
-                        else
-                        {
-                            ll_loading.setVisibility(View.GONE);
-                        }
-                        prePosition = currentPosition;
+                            prePosition = currentPosition;
 
 
                     }
@@ -451,7 +437,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
 
                 case SHOW_SPEED://显示网速
                     //1.得到网络速度
-                    String netSpeed = utils.getNetSpeed(SystemVideoPlayer.this);
+                    String netSpeed = utils.getNetSpeed(VitamioVideoPlayerActivity.this);
 
                     //显示网络速
                     tv_laoding_netspeed.setText("玩命加载中..." + netSpeed);
@@ -469,7 +455,8 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_system_video_player);
+        Vitamio.isInitialized(this);
+        setContentView(R.layout.activity_vitamio_video_player);
         utils = new Utils();
         findViews();
 
@@ -487,7 +474,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
 //        Log.e(TAG, "uri==" + uri.toString());
         //        Bundle bundle = getIntent().getExtras();
         //        mediaItems = (List<MediaItem>) bundle.getSerializable("videolist");
-        mediaItems = (List<MediaItem>) getIntent().getSerializableExtra("videolist");
+        mediaItems = (List<MediaItem>) getIntent().getSerializableExtra("listvideo");
         position = getIntent().getIntExtra("position", 0);
     }
 
@@ -584,15 +571,15 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
 
     private void initListener()
     {
-        videoview_system.setOnPreparedListener(new MediaPlayer.OnPreparedListener()
+        videoview_system.setOnPreparedListener(new io.vov.vitamio.MediaPlayer.OnPreparedListener()
         {
             @Override
-            public void onPrepared(MediaPlayer mp)
+            public void onPrepared(io.vov.vitamio.MediaPlayer mp)
             {
                 videoview_system.start();
 
                 //获得总时长
-                int duration = videoview_system.getDuration();
+                int duration = (int) videoview_system.getDuration();
 
                 tvDuration.setText(utils.stringForTime(duration));
                 seekbarVideo.setMax(duration);
@@ -619,24 +606,22 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
                 setVideoType(DEFAULT_SCREEN);
             }
         });
-        videoview_system.setOnErrorListener(new MediaPlayer.OnErrorListener()
+        videoview_system.setOnErrorListener(new io.vov.vitamio.MediaPlayer.OnErrorListener()
         {
             @Override
-            public boolean onError(MediaPlayer mp, int what, int extra)
+            public boolean onError(io.vov.vitamio.MediaPlayer mp, int what, int extra)
             {
-                Toast.makeText(SystemVideoPlayer.this, "播放出错了", Toast.LENGTH_SHORT).show();
-                startVitamioPlayer();
-                //出错后不弹出对话框
+                Toast.makeText(VitamioVideoPlayerActivity.this, "播放出错了", Toast.LENGTH_SHORT).show();
                 return true;
-
             }
         });
-        videoview_system.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+        videoview_system.setOnCompletionListener(new io.vov.vitamio.MediaPlayer.OnCompletionListener()
+
         {
             @Override
-            public void onCompletion(MediaPlayer mp)
+            public void onCompletion(io.vov.vitamio.MediaPlayer mp)
             {
-                Toast.makeText(SystemVideoPlayer.this, "播放完成", Toast.LENGTH_SHORT).show();
+                Toast.makeText(VitamioVideoPlayerActivity.this, "播放完成", Toast.LENGTH_SHORT).show();
 
                 playNextVideo();
             }
@@ -704,10 +689,10 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
             {
-                videoview_system.setOnInfoListener(new MediaPlayer.OnInfoListener()
+                videoview_system.setOnInfoListener(new io.vov.vitamio.MediaPlayer.OnInfoListener()
                 {
                     @Override
-                    public boolean onInfo(MediaPlayer mp, int what, int extra)
+                    public boolean onInfo(io.vov.vitamio.MediaPlayer mp, int what, int extra)
                     {
                         switch (what)
                         {
@@ -751,7 +736,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener
         }
         else
         {
-            Toast.makeText(SystemVideoPlayer.this, "帅哥你没有传递数据", Toast.LENGTH_SHORT).show();
+            Toast.makeText(VitamioVideoPlayerActivity.this, "帅哥你没有传递数据", Toast.LENGTH_SHORT).show();
         }
         setButtonState();
     }

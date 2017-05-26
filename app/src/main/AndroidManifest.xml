@@ -3,20 +3,27 @@
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <!--调节亮度的权限-->
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- 调节亮度的权限 -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.MainActivity"
-                  android:configChanges="keyboardHidden|screenSize|orientation"
-            >
+        <activity
+            android:name=".activity.MainActivity"
+            android:configChanges="keyboardHidden|screenSize|orientation">
         </activity>
         <activity android:name=".activity.SplashActivity">
             <intent-filter>
@@ -25,38 +32,52 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activity.SystemVideoPlayer"
-                  android:configChanges="keyboardHidden|screenSize|orientation"
-                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-                  android:label="@string/player_name"
-            >
+        <activity
+            android:name=".activity.SystemVideoPlayer"
+            android:configChanges="keyboardHidden|screenSize|orientation"
+            android:label="@string/player_name"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="rtsp" />
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="rtsp"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="video/*" />
-                <data android:mimeType="application/sdp" />
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="application/sdp"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" />
-                <data android:mimeType="video/mp4" />
-                <data android:mimeType="video/3gp" />
-                <data android:mimeType="video/3gpp" />
-                <data android:mimeType="video/3gpp2" />
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="http"/>
+                <data android:mimeType="video/mp4"/>
+                <data android:mimeType="video/3gp"/>
+                <data android:mimeType="video/3gpp"/>
+                <data android:mimeType="video/3gpp2"/>
             </intent-filter>
         </activity>
 
         <receiver android:name=".receiver.MyBateryReceiver"/>
 
+        <activity android:name=".activity.VitamioVideoPlayerActivity"/>
 
+        <!-- Don't forgot InitActivity -->
+        <activity
+            android:name="io.vov.vitamio.activity.InitActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+            android:launchMode="singleTop"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:windowSoftInputMode="stateAlwaysHidden" />
     </application>
 
 </manifest>
