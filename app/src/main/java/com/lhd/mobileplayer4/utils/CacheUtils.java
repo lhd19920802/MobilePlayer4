@@ -22,4 +22,15 @@ public class CacheUtils
         SharedPreferences sp = mContext.getSharedPreferences("net_video", Context.MODE_PRIVATE);
         return sp.getString(key, "");
     }
+
+    public static void putInt(Context mContext, String key, int value)
+    {
+        SharedPreferences sp = mContext.getSharedPreferences("audio", Context.MODE_PRIVATE);
+        sp.edit().putInt(key, value).commit();
+    }
+    public static int getInt(Context mContext,String key)
+    {
+        SharedPreferences sp = mContext.getSharedPreferences("audio", Context.MODE_PRIVATE);
+        return sp.getInt(key,1);
+    }
 }

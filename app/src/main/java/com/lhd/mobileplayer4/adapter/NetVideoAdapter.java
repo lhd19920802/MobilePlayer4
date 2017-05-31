@@ -69,7 +69,7 @@ public class NetVideoAdapter extends BaseAdapter
 
         MediaItem mediaItem = mediaItems.get(position);
         x.image().bind(viewHolder.iv_icon,mediaItem.getCoverImg());
-        viewHolder.tv_name.setText(mediaItem.getMovieName());
+        viewHolder.tv_name.setText(mediaItem.getName());
         viewHolder.tv_desc.setText(mediaItem.getVideoTitle());
 
         return convertView;
