@@ -20,6 +20,8 @@ import com.lhd.mobileplayer4.activity.MusicPlayerActivity;
 import com.lhd.mobileplayer4.domain.MediaItem;
 import com.lhd.mobileplayer4.utils.CacheUtils;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -233,7 +235,12 @@ public class MusicPlayerService extends Service
         public void onPrepared(MediaPlayer mp)
         {
             start();
-            notifyChange(OPENAUDIO);
+            /**
+             * 发送广播
+             */
+//            notifyChange(OPENAUDIO);
+            //发消息
+            EventBus.getDefault().post(mediaItem);
         }
     }
 

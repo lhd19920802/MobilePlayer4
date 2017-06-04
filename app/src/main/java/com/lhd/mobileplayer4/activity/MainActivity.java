@@ -1,12 +1,15 @@
 package com.lhd.mobileplayer4.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lhd.mobileplayer4.R;
@@ -19,7 +22,7 @@ import com.lhd.mobileplayer4.fragment.VideoFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity
+public class MainActivity extends FragmentActivity implements View.OnClickListener
 {
 
     private FrameLayout fl_main_content;
@@ -28,6 +31,9 @@ public class MainActivity extends FragmentActivity
     private List<BaseFragment> fragments;
     //上一次fragment
     private BaseFragment preFragment;
+
+    private TextView tv_search;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -36,6 +42,8 @@ public class MainActivity extends FragmentActivity
         
         initView();
         rg_bottom_tag.check(R.id.rb_video);
+
+
         
     }
 
@@ -43,9 +51,11 @@ public class MainActivity extends FragmentActivity
     {
         fl_main_content = (FrameLayout)findViewById(R.id.fl_main_content);
         rg_bottom_tag = (RadioGroup)findViewById(R.id.rg_bottom_tag);
+        tv_search = (TextView)findViewById(R.id.tv_search);
         fragments = new ArrayList<>();
         initFragments();
         rg_bottom_tag.setOnCheckedChangeListener(new MyOnCheckedChangeListener());
+        tv_search.setOnClickListener(this);
     }
 
     private void initFragments()
@@ -54,6 +64,17 @@ public class MainActivity extends FragmentActivity
         fragments.add(new AudioFragment());
         fragments.add(new NetVideoFragment());
         fragments.add(new NetAudioFragment());
+    }
+
+    @Override
+    public void onClick(View v)
+    {
+        switch (v.getId()) {
+            case R.id.tv_search :
+                Intent intent = new Intent(this, SearchActivity.class);
+                startActivity(intent);
+                break;
+        }
     }
 
     class MyOnCheckedChangeListener implements RadioGroup.OnCheckedChangeListener

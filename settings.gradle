@@ -1,2 +1,4 @@
-include ':app', ':StartAllPlayer', ':vitamio-sample', ':vitamio-library', ':xutils_library'
+include ':app', ':StartAllPlayer', ':vitamio-sample', ':vitamio-library', ':xutils_library', ':EventBus3.0_Sample', ':EventBus', ':jcvideoplayer-lib'
 include ':xListView'
+
+include ':speechDemo'

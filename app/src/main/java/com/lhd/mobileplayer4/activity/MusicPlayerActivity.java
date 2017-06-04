@@ -1,17 +1,17 @@
 package com.lhd.mobileplayer4.activity;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -23,11 +23,16 @@ import android.widget.Toast;
 
 import com.lhd.mobileplayer4.IMusicPlayerService;
 import com.lhd.mobileplayer4.R;
+import com.lhd.mobileplayer4.domain.MediaItem;
 import com.lhd.mobileplayer4.service.MusicPlayerService;
 import com.lhd.mobileplayer4.utils.LyricUtils;
 import com.lhd.mobileplayer4.utils.Utils;
 import com.lhd.mobileplayer4.view.BaseVisualizerView;
 import com.lhd.mobileplayer4.view.ShowLyricView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 
@@ -63,12 +68,14 @@ public class MusicPlayerActivity extends Activity implements View.OnClickListene
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder)
         {
+            Log.e("TAG", "onServiceConnected=="+"我被执行了");
             //服务的代理类
             service = IMusicPlayerService.Stub.asInterface(iBinder);
             if (service != null)
             {
 
                 //从列表打开
+
 
 
                 try
@@ -81,7 +88,7 @@ public class MusicPlayerActivity extends Activity implements View.OnClickListene
                     else
                     {
                         //从任务栏进入
-                        showData();
+                        showData(null);
                     }
                 }
                 catch (RemoteException e)
@@ -105,7 +112,7 @@ public class MusicPlayerActivity extends Activity implements View.OnClickListene
      * 点击音频的位置
      */
     private int position;
-    private MyReceiver receiver;
+//    private MyReceiver receiver;
     private Utils utils;
     private boolean notification;
 
@@ -137,6 +144,9 @@ public class MusicPlayerActivity extends Activity implements View.OnClickListene
         btnAudioStartPause.setOnClickListener(this);
         btnAudioNext.setOnClickListener(this);
         btnLyrc.setOnClickListener(this);
+
+        AnimationDrawable ad = (AnimationDrawable) ivIcon.getBackground();
+        ad.start();
     }
 
     /**
@@ -379,12 +389,15 @@ public class MusicPlayerActivity extends Activity implements View.OnClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_player);
         utils = new Utils();
+
+        bindAndStartService();
         getData();
         initData();
         findViews();
         initListener();
 
-        bindAndStartService();
+
+
     }
 
     /**
@@ -433,10 +446,14 @@ public class MusicPlayerActivity extends Activity implements View.OnClickListene
 
     private void initData()
     {
-        receiver = new MyReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(MusicPlayerService.OPENAUDIO);
-        registerReceiver(receiver, filter);
+//        receiver = new MyReceiver();
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction(MusicPlayerService.OPENAUDIO);
+//        registerReceiver(receiver, filter);
+
+
+        //1.EventBus注册
+        EventBus.getDefault().register(this);//this是当前类
     }
 
     private void getData()
@@ -461,20 +478,21 @@ public class MusicPlayerActivity extends Activity implements View.OnClickListene
         startService(intent);//不至于实例化多个服务
     }
 
-    class MyReceiver extends BroadcastReceiver
-
-    {
-        @Override
-        public void onReceive(Context context, Intent intent)
-        {
-            showData();
-        }
-    }
+//    class MyReceiver extends BroadcastReceiver
+//
+//    {
+//        @Override
+//        public void onReceive(Context context, Intent intent)
+//        {
+//            showData();
+//        }
+//    }
 
     /**
      * 显示数据
      */
-    private void showData()
+    @Subscribe(threadMode = ThreadMode.MAIN,sticky = false,priority = 0)
+    public void showData(MediaItem mediaItem)
     {
         //发消息开始歌词同步
         showLyric();
@@ -543,13 +561,15 @@ public class MusicPlayerActivity extends Activity implements View.OnClickListene
     protected void onDestroy()
     {
         super.onDestroy();
-        if(receiver!=null) {
-            unregisterReceiver(receiver);
-            receiver=null;
-        }
+//        if(receiver!=null) {
+//            unregisterReceiver(receiver);
+//            receiver=null;
+//        }
         if(conn!=null) {
             unbindService(conn);
             conn = null;
         }
+        //2.EventBus取消注册
+        EventBus.getDefault().unregister(this);
     }
 }
